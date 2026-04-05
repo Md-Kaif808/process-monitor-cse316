@@ -12,6 +12,7 @@ const memHist   = Array(N).fill(0);
 const timeLabels = Array(N).fill('');   // rolling timestamp labels
 
 // ── Charts ───────────────────────────────────────────────────────────
+// CPU and memory charts logic
 function mkChart(id, color, fill, thresholdColor) {
   return new Chart(document.getElementById(id), {
     type: 'line',
