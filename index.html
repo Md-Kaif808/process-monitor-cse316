@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ProcMon — CSE 316</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">PM</div>
+    <div><span class="logo-text">ProcMon</span><span class="logo-sub">/ CSE-316 CA2</span></div>
+  </div>
+  <div class="hright">
+    <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle light / dark mode">🌙</button>
+    <span class="clock-badge" id="clock">00:00:00</span>
+    <div class="live-pill" id="live-pill">
+      <span class="dot" id="dot"></span>
+      <span id="live-label">LIVE</span>
+    </div>
+    <button class="pause-btn" id="pause-btn" onclick="togglePause()">⏸ Pause</button>
+  </div>
+</header>
+
+<div class="main">
+
+  <div class="alert-bar" id="alert-bar">
+    <span>⚠</span><span><b>HIGH CPU:</b> <span id="alert-text"></span></span>
+  </div>
+
+  <div class="metrics-grid">
+    <div class="mcard mc-blue">
+      <div class="mcard-top"><span class="mcard-label">CPU Usage</span><div class="mcard-ico ico-b">⚡</div></div>
+      <div class="mcard-value" id="cpu-val" style="color:var(--blue2)">—</div>
+      <div class="mcard-sub" id="cpu-sub">—</div>
+      <div class="prog"><div class="prog-fill" id="cpu-bar" style="width:0%;background:var(--blue)"></div></div>
+    </div>
+    <div class="mcard mc-green">
+      <div class="mcard-top"><span class="mcard-label">Memory</span><div class="mcard-ico ico-g">🧠</div></div>
+      <div class="mcard-value" id="mem-val" style="color:var(--green2)">—</div>
+      <div class="mcard-sub" id="mem-sub">—</div>
+      <div class="prog"><div class="prog-fill" id="mem-bar" style="width:0%;background:var(--green)"></div></div>
+    </div>
+    <div class="mcard mc-yellow">
+      <div class="mcard-top"><span class="mcard-label">Disk</span><div class="mcard-ico ico-y">💾</div></div>
+      <div class="mcard-value" id="disk-val" style="color:var(--yellow2)">—</div>
+      <div class="mcard-sub" id="disk-sub">—</div>
+      <div class="prog"><div class="prog-fill" id="disk-bar" style="width:0%;background:var(--yellow)"></div></div>
+    </div>
+    <div class="mcard mc-purple">
+      <div class="mcard-top"><span class="mcard-label">Processes</span><div class="mcard-ico ico-p">⚙</div></div>
+      <div class="mcard-value" id="proc-val" style="color:var(--purple2)">—</div>
+      <div class="mcard-sub" id="proc-sub">—</div>
+      <div class="mcard-sub" id="boot-sub" style="margin-top:5px;font-size:10px">Boot —</div>
+    </div>
+  </div>
+
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="sec-label">Performance History — last 60s</div>
+      <div class="chart-panels">
+
+        <!-- CPU Chart Panel -->
+        <div class="chart-panel">
+          <div class="chart-panel-header">
+            <div class="chart-panel-left">
+              <span class="chart-panel-title">CPU Usage</span>
+              <span class="chart-live-val" id="cpu-cur">0%</span>
+            </div>
+            <div class="chart-stats">
+              <div class="chart-stat"><span class="stat-label">MIN</span><span class="stat-val" id="cpu-min">—</span></div>
+              <div class="chart-stat"><span class="stat-label">MAX</span><span class="stat-val" id="cpu-max">—</span></div>
+              <div class="chart-stat"><span class="stat-label">AVG</span><span class="stat-val" id="cpu-avg">—</span></div>
+            </div>
+          </div>
+          <div class="chart-canvas-wrap"><canvas id="cpuChart"></canvas></div>
+          <div class="chart-footer">
+            <span class="chart-footer-label">60s ago</span>
+            <span class="chart-footer-label">— dashed line = 80% threshold —</span>
+            <span class="chart-footer-label">now</span>
+          </div>
+        </div>
+
+        <!-- Memory Chart Panel -->
+        <div class="chart-panel">
+          <div class="chart-panel-header">
+            <div class="chart-panel-left">
+              <span class="chart-panel-title">Memory Usage</span>
+              <span class="chart-live-val" id="mem-cur">0%</span>
+            </div>
+            <div class="chart-stats">
+              <div class="chart-stat"><span class="stat-label">MIN</span><span class="stat-val" id="mem-min">—</span></div>
+              <div class="chart-stat"><span class="stat-label">MAX</span><span class="stat-val" id="mem-max">—</span></div>
+              <div class="chart-stat"><span class="stat-label">AVG</span><span class="stat-val" id="mem-avg">—</span></div>
+            </div>
+          </div>
+          <div class="chart-canvas-wrap"><canvas id="memChart"></canvas></div>
+          <div class="chart-footer">
+            <span class="chart-footer-label">60s ago</span>
+            <span class="chart-footer-label">— dashed line = 80% threshold —</span>
+            <span class="chart-footer-label">now</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="sec-label">Per-Core CPU</div>
+      <div class="cores-grid" id="cores-grid"></div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="toolbar">
+      <span class="tbl-title">Processes</span>
+      <span class="count-tag" id="visible-count">0</span>
+      <div class="spacer"></div>
+      <div class="search-wrap">
+        <span class="search-ico">🔍</span>
+        <input class="search-input" id="search" type="text" placeholder="Search name or user…" oninput="renderTable()"/>
+      </div>
+      <div class="filters">
+        <button class="fbtn on" data-f="all"      onclick="setFilter('all',this)">All</button>
+        <button class="fbtn"    data-f="running"  onclick="setFilter('running',this)">Running</button>
+        <button class="fbtn"    data-f="sleeping" onclick="setFilter('sleeping',this)">Sleeping</button>
+        <button class="fbtn"    data-f="stopped"  onclick="setFilter('stopped',this)">Stopped</button>
+        <button class="fbtn"    data-f="zombie"   onclick="setFilter('zombie',this)">Zombie</button>
+      </div>
+    </div>
+    <div class="tbl-scroll">
+      <table>
+        <thead><tr>
+          <th onclick="sortBy('pid')">PID</th>
+          <th onclick="sortBy('name')">Name</th>
+          <th>State</th>
+          <th onclick="sortBy('cpu_percent')">CPU %</th>
+          <th onclick="sortBy('memory_percent')">Mem %</th>
+          <th onclick="sortBy('threads')">Threads</th>
+          <th>User</th>
+          <th>Started</th>
+          <th>Action</th>
+        </tr></thead>
+        <tbody id="proc-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<footer>CSE-316 CA2 &nbsp;·&nbsp; Real-Time Process Monitoring Dashboard &nbsp;·&nbsp; Python · Flask · psutil</footer>
+<div id="toast"></div>
+
+<script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+</html>
