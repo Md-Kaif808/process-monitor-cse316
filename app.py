@@ -2,7 +2,7 @@
 Real-Time Process Monitoring Dashboard
 CSE-316 CA2 Project — Backend: Flask + psutil
 """
-
+# Backend logic using Flask and psutil
 from flask import Flask, render_template, jsonify
 import psutil
 import datetime
