@@ -309,6 +309,7 @@ function renderTable() {
 }
 
 // ── Kill ─────────────────────────────────────────────────────────────
+// Process termination functionality
 async function killProcess(pid, name) {
   if (killingPIDs.has(pid) || killedPIDs.has(pid)) return;
   if (!confirm(`Terminate "${name}" (PID ${pid})?`)) return;
