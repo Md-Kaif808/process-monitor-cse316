@@ -136,7 +136,7 @@ def kill_pid(pid):
 
 
 # ── Routes ────────────────────────────────────────────────────────────────────
-
+# API endpoints for system stats and processes
 @app.route("/")
 def index():
     return render_template("index.html")
